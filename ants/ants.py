@@ -29,7 +29,7 @@ class Place:
         self.ant = None       # An Ant
         self.entrance = None  # A Place
         # Phase 1: Add an entrance to the exit
-        "*** YOUR CODE HERE ***"
+        print("Hello")
 
     def add_insect(self, insect):
         """Add an Insect to this Place.
