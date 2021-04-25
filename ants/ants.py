@@ -8,6 +8,7 @@ import sys
 from ucb import main, interact, trace
 from collections import OrderedDict
 
+#Bernie commit test
 
 ################
 # Core Classes #
