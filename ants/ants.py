@@ -28,6 +28,10 @@ class Place:
         self.bees = []        # A list of Bees
         self.ant = None       # An Ant
         self.entrance = None  # A Place
+        
+        if exit is not None:
+            exit.entrance = self
+        
         # Phase 1: Add an entrance to the exit
         print("Hello")
 
@@ -155,13 +159,15 @@ class HarvesterAnt(Ant):
 
     name = 'Harvester'
     implemented = True
+    food_cost = 2
+    armor = 1
 
     def action(self, colony):
         """Produce 1 additional food for the colony.
 
         colony -- The AntColony, used to access game state information.
         """
-        "*** YOUR CODE HERE ***"
+        colony.food += 1
 
 def random_or_none(l):
     """Return a random element of list l, or return None if l is empty."""
@@ -174,6 +180,8 @@ class ThrowerAnt(Ant):
     name = 'Thrower'
     implemented = True
     damage = 1
+    food_cost = 4
+    armor = 1
 
     def nearest_bee(self, hive):
         """Return the nearest Bee in a Place that is not the Hive, connected to
@@ -429,8 +437,6 @@ def make_insane_assault_plan():
     for time in range(3, 15):
         plan.add_wave(time, 1)
     return plan.add_wave(15, 20)
-
-
 
 ##############
 # Extensions #
