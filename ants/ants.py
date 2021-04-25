@@ -28,7 +28,9 @@ class Place:
         self.bees = []        # A list of Bees
         self.ant = None       # An Ant
         self.entrance = None  # A Place
-        # Phase 1: Add an entrance to the exit
+
+        if exit is not None:
+            exit.entrance = self
         print("Hello")
 
     def add_insect(self, insect):
@@ -155,13 +157,15 @@ class HarvesterAnt(Ant):
 
     name = 'Harvester'
     implemented = True
+    food_cost = 2
+    armor = 1
 
     def action(self, colony):
         """Produce 1 additional food for the colony.
 
         colony -- The AntColony, used to access game state information.
         """
-        "*** YOUR CODE HERE ***"
+        colony.food +=1
 
 def random_or_none(l):
     """Return a random element of list l, or return None if l is empty."""
