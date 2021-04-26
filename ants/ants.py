@@ -34,7 +34,6 @@ class Place:
             exit.entrance = self
         
         # Phase 1: Add an entrance to the exit
-        print("Hello")
 
     def add_insect(self, insect):
         """Add an Insect to this Place.
@@ -69,6 +68,7 @@ class Place:
         return self.name
 
 
+
 class Insect:
     """An Insect, the base class of Ant and Bee, has armor and a Place."""
 
@@ -76,7 +76,7 @@ class Insect:
         """Create an Insect with an armor amount and a starting Place."""
         self.armor = armor
         self.place = place  # set by Place.add_insect and Place.remove_insect
-
+        self.watersafe = False
 
     def reduce_armor(self, amount):
         """Reduce armor by amount, and remove the insect from its place if it
@@ -111,6 +111,7 @@ class Bee(Insect):
     """A Bee moves from place to place, following exits and stinging ants."""
 
     name = 'Bee'
+    watersafe = True
 
     def sting(self, ant):
         """Attack an Ant, reducing the Ant's armor by 1."""
@@ -123,9 +124,12 @@ class Bee(Insect):
 
     def blocked(self):
         """Return True if this Bee cannot advance to the next Place."""
+        
         # Phase 2: Special handling for NinjaAnt
-        "*** YOUR CODE HERE ***"
-        return self.place.ant is not None
+        if self.place.ant is not None:
+            return self.place.ant.blocks_path
+        return False
+
 
     def action(self, colony):
         """A Bee's action stings the Ant that blocks its exit if it is blocked,
@@ -146,6 +150,7 @@ class Ant(Insect):
     implemented = False  # Only implemented Ant classes should be instantiated
     damage = 0
     food_cost = 0
+    blocks_path = True
 
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
@@ -169,6 +174,8 @@ class HarvesterAnt(Ant):
         colony -- The AntColony, used to access game state information.
         """
         colony.food += 1
+        
+
 
 def random_or_none(l):
     """Return a random element of list l, or return None if l is empty."""
@@ -443,26 +450,45 @@ def make_insane_assault_plan():
 # Extensions #
 ##############
 
-
 class Water(Place):
     """Water is a place that can only hold 'watersafe' insects."""
 
     def add_insect(self, insect):
-        """Add insect if it is watersafe, otherwise reduce its armor to 0."""
+        #add the insect
+        Place.add_insect(self, insect)
         print('added', insect, insect.watersafe)
-        "*** YOUR CODE HERE ***"
+        #insect added, now reduce health if not watersafe
+        if not insect.watersafe:
+            if insect.is_ant():
+                print('We have an Ant in the pool! Drown it!')
+                self.ant.reduce_armor(insect.armor)
+            
 
 
 class FireAnt(Ant):
     """FireAnt cooks any Bee in its Place when it expires."""
 
     name = 'Fire'
+    implemented = True
+    food_cost = 4
+    armor = 1
     damage = 3
-    "*** YOUR CODE HERE ***"
-    implemented = False
-
+    
+    def damage_all_bees(self):
+        print("All bees will take damage by fire ant!")
+        target_bees = self.place.bees[:]
+        for bee in self.place.bees: 
+            if bee in target_bees:
+                bee.reduce_armor(self.damage)
+        
+        
+    
     def reduce_armor(self, amount):
-        "*** YOUR CODE HERE ***"
+        self.armor -= amount
+        if self.armor <= 0:
+            self.damage_all_bees()
+            print('{0} ran out of armor and expired'.format(self))
+            self.place.remove_insect(self)
 
 
 class LongThrower(ThrowerAnt):
@@ -485,8 +511,9 @@ class WallAnt(Ant):
     """WallAnt is an Ant which has a large amount of armor."""
 
     name = 'Wall'
-    "*** YOUR CODE HERE ***"
-    implemented = False
+    armor = 4
+    food_cost = 4
+    implemented = True
 
     def __init__(self):
         "*** YOUR CODE HERE ***"
@@ -498,11 +525,19 @@ class NinjaAnt(Ant):
     all Bees in the exact same Place."""
 
     name = 'Ninja'
-    "*** YOUR CODE HERE ***"
-    implemented = False
-
+    blocks_path = False
+    implemented = True
+    food_cost = 6
+    damage = 1
+    
     def action(self, colony):
-        "*** YOUR CODE HERE ***"
+        target_bees = self.place.bees[:]
+        for bee in self.place.bees: 
+            if bee in target_bees:
+                bee.reduce_armor(self.damage)
+            
+            
+        
 
 
 class ScubaThrower(ThrowerAnt):
