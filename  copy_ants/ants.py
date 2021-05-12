@@ -707,8 +707,6 @@ class QueenAnt(ScubaThrower):
         global forwards, backwards
         if self.impostor is True:
             self.armor = 0
-            return
-
         colony.queen = QueenPlace(colony.queen, self.place)
         self.throw_at(self.nearest_bee(colony.hive))
 
