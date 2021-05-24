@@ -11,8 +11,7 @@ from ucb import main, interact, trace
 from collections import OrderedDict
 
 
-
-
+# Bernie commit test
 
 ################
 # Core Classes #
@@ -174,7 +173,6 @@ class Ant(Insect):
     food_cost = 0
     blocks_path = True
     container = False
-    doubled = False
 
     def __init__(self, armor=1):
         """Create an Ant with an armor quantity."""
@@ -236,6 +234,7 @@ class ThrowerAnt(Ant):
 
         Problem B5: This method returns None if there is no Bee in range.
         """
+
         bee_place = self.place
 
         if self.min_range > 0:
@@ -243,13 +242,12 @@ class ThrowerAnt(Ant):
                 bee_place = bee_place.entrance
 
         total = self.min_range
-        while bee_place is not None and bee_place != hive and total <= self.max_range:
-            bee = random_or_none(bee_place.bees)
-            if bee is None:
+        while bee_place.entrance != hive and total <= self.max_range:
+            if random_or_none(bee_place.bees) is None:
                 bee_place = bee_place.entrance
                 total = total + 1
             else:
-                return bee
+                return random_or_none(bee_place.bees)
 
     def throw_at(self, target):
         """Throw a leaf at the target Bee, reducing its armor."""
@@ -691,14 +689,16 @@ class QueenAnt(ScubaThrower):
     implemented = True
     num_queens = 0
     impostor = False
+    fans = []
     
     
     def __init__(self):
-        #To remove imposters and count the queen
+        #Sasha's code
         ScubaThrower.__init__(self)
         QueenAnt.num_queens += 1
         if QueenAnt.num_queens > 1:
             self.impostor = True
+
 
     def action(self, colony):
         """A queen ant throws a leaf, but also doubles the damage of ants
@@ -710,47 +710,60 @@ class QueenAnt(ScubaThrower):
             self.armor = 0
             
         colony.queen = QueenPlace(colony.queen, self.place)
+        self.throw_at(self.nearest_bee(colony.hive))
+        
+        queen_location = self.place
+        if queen_location.entrance is not None:
+            backwards = True
+        if queen_location.exit is not None:
+            forwards = True
+
+        def double_damage(place):
+            if place.ant != None:
+                if place.ant not in QueenAnt.fans or isinstance(place.ant, QueenAnt):
+                    place.ant.damage = place.ant.damage * 2
+                    QueenAnt.fans.append(place.ant)
+            return
         
         print("\n------- Queen Attacked! --------")
-        
-        #Takes a place, finds the ants in it, and doubles their damage
-        #Ignores queen, ignores empty places with no ants and ignores bodyguards
-        
-        if type(self.place.ant) == BodyguardAnt:
-            self.place.ant.damage *= 2
-            self.place.ant.doubled = True
+    
+        #traversal backward
+        marker = queen_location
+        while backwards:
+            # print("Current location: ", marker.name)
+            # if marker.ant != None:
+            #     print("Ants present: ", marker.ant.name)
+            # else:
+            #     print("No ant present")
             
-        marker = self.place
-        while marker.exit is not None:
+            double_damage(marker)
+            
+            #Go to next location
+            if marker.exit is None:
+                backwards = False
             marker = marker.exit
-            if marker.ant: 
-                if not marker.ant.doubled and not type(marker.ant) == QueenAnt:
-                    marker.ant.damage *= 2
-                    marker.ant.doubled = True
-                if marker.ant.container and marker.ant.ant and not type(marker.ant.ant) == QueenAnt:
-                    if not marker.ant.ant.doubled:
-                        marker.ant.ant.damage *=2
-                        marker.ant.ant.doubled = True
-                    
-        marker = self.place            
-        while marker.entrance is not None:
+    
+        marker = queen_location
+        while forwards:
+            # print("Current location: ", marker.name)
+            # #Printing the ant if there is any
+            # if marker.ant != None:
+            #     print("Ants present: ", marker.ant.name)
+            # else:
+            #     print("No ant present")
+            
+            double_damage(marker)
+            
+            #Go to next location
+            if marker.entrance is None:
+                forwards = False
             marker = marker.entrance
-            if marker.ant: 
-                if not marker.ant.doubled and not type(marker.ant) == QueenAnt:
-                    marker.ant.damage *= 2
-                    marker.ant.doubled = True
-                if marker.ant.container and marker.ant.ant and not type(marker.ant.ant) == QueenAnt:
-                    if not marker.ant.ant.doubled:
-                        marker.ant.ant.damage *=2
-                        marker.ant.ant.doubled = True
-
-            ScubaThrower.action(self, colony)
-            return
-            
-            
             
             
         
+            
+            
+            
                 
             
             
